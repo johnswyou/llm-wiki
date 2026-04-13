@@ -1,6 +1,6 @@
 # llm-wiki
 
-A personal research knowledge base powered by LLMs and [Obsidian](https://obsidian.md/). Instead of re-deriving knowledge from raw documents on every query (like RAG), an LLM incrementally builds and maintains a persistent, cross-linked wiki of markdown files that compounds over time.
+A personal research knowledge base (i.e., "second brain") powered by Claude Code and [Obsidian](https://obsidian.md/). Instead of re-deriving knowledge from raw documents on every query (like RAG), an LLM incrementally builds and maintains a persistent, cross-linked wiki of markdown files that compounds over time.
 
 Based on Andrej Karpathy's LLM Wiki pattern:
 
