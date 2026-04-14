@@ -3,5 +3,7 @@
   "newLinkFormat": "shortest",
   "useMarkdownLinks": false,
   "showUnsupportedFiles": false,
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "raw"
 }
