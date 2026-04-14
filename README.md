@@ -101,6 +101,7 @@ A single ingest typically touches 10-15 wiki pages.
 |-----------|-------------|---------------|
 | **Ingest** | Process a new source into the wiki | `"Ingest raw/filename.md"` |
 | **Query** | Ask questions against the wiki | Ask any question naturally |
+| **Generate & Ingest** | Save an LLM answer to `raw/` with provenance, then ingest it | `"Save this to raw and ingest"` |
 | **Lint** | Health-check the wiki for issues | `"Run a lint pass on the wiki"` |
 
 ### Query examples
@@ -112,7 +113,7 @@ What concepts are mentioned most but have the thinnest coverage?
 Create a slide deck summarizing topic Z.
 ```
 
-Substantial query answers can be filed back into the wiki as new pages, so your explorations compound over time.
+Substantial query answers can be filed back into the wiki as new pages, or saved to `raw/` as generated sources and ingested for full provenance tracking. Either way, your explorations compound over time.
 
 ### Lint checks
 
@@ -147,14 +148,14 @@ All wiki pages carry YAML frontmatter for Dataview queries and LLM navigation.
 |------|-----------------|-----|
 | Entity | `Name.md` | People, organizations, products, tools |
 | Concept | `Name.md` | Ideas, topics, techniques, principles |
-| Source Summary | `Summary - Title.md` | One per ingested raw source |
+| Source Summary | `Summary - Title.md` | One per ingested raw source (external or LLM-generated) |
 | Comparison | `X vs Y.md` | Structured side-by-side analysis |
 
 ## Tips
 
 - **Graph View** is the best way to see the shape of your wiki. Open it with Cmd+G / Ctrl+G. Optionally add color groups in Graph View settings: `path:wiki` in one color, `path:raw` in another.
 - **You rarely touch the wiki directly.** The LLM writes and maintains all of it. You read it in Obsidian and guide the LLM through conversation.
-- **Answers compound.** When the LLM produces a good analysis or comparison, file it back into the wiki as a new page. Your explorations become part of the knowledge base.
+- **Answers compound.** When the LLM produces a good analysis or comparison, file it directly into the wiki or save it to `raw/` and ingest it for full source provenance. Either way, your explorations become part of the knowledge base.
 - **The index is the navigation hub.** At moderate scale (under a few hundred pages), `wiki/index.md` is sufficient for the LLM to find relevant content without embedding-based RAG.
 - **Git gives you history for free.** The wiki is just a git repo of markdown files — you get version history, diffing, and branching.
 
