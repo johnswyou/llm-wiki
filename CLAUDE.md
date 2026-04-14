@@ -24,7 +24,7 @@ This is a personal research knowledge base following the LLM Wiki pattern (Karpa
 
 ## Rules
 
-1. **Never modify files in `raw/`.** They are the immutable source of truth. Read from them; never write to them.
+1. **Never modify files in `raw/`.** They are the immutable source of truth. Read from them; never write to them. (Exception: the Generate & Ingest workflow *creates* new files in `raw/`, but once created they are immutable like any other raw source.)
 2. **Always update `wiki/index.md`** when creating or significantly modifying a wiki page. The index is the primary navigation tool.
 3. **Always append to `wiki/log.md`** after completing any operation (ingest, query filed to wiki, lint pass).
 4. **Use YAML frontmatter** on every wiki page, following the schemas defined below.
@@ -84,11 +84,17 @@ author: ""
 date_published: YYYY-MM-DD
 date_ingested: YYYY-MM-DD
 url: ""
-source_type: article | paper | book | video | dataset | repo | other
+source_type: article | paper | book | video | dataset | repo | synthesis | other
+origin: external | generated   # default: external
+generator: ""                   # only when origin: generated (e.g., "claude")
+prompt: ""                      # only when origin: generated — the question that produced this
 tags: []
 raw_path: "raw/filename.md"
 ---
 ```
+
+- `origin: external` (default) — clipped from the web, copied from a paper, or otherwise human-authored.
+- `origin: generated` — produced by the LLM during a conversation and saved to `raw/` for provenance. Use `source_type: synthesis` for these.
 
 Sections: Metadata (table), Summary, Key Takeaways (numbered), Notable Quotes (blockquotes), Connections (links to entity/concept pages).
 
@@ -116,6 +122,22 @@ Sections: Overview, Comparison (markdown table), Analysis, Sources.
 - **Comparison pages**: Use `vs` format. Example: `RAG vs LLM Wiki.md`
 - **Tags**: Lowercase, hyphenated. Example: `#deep-learning`, `#transformer`
 - **Raw source files**: Keep original filename from Web Clipper or use descriptive name
+- **Generated raw files**: Prefixed with `Generated - `. Example: `Generated - Database System End to End Walkthrough.md`
+
+## Raw Document Conventions
+
+External raw sources (web clips, papers) have no required frontmatter — they are whatever format the source provides.
+
+Generated raw sources **must** include this frontmatter so their provenance is explicit:
+
+```yaml
+---
+origin: generated
+generator: claude
+date_generated: YYYY-MM-DD
+prompt: "The question or request that produced this document"
+---
+```
 
 ## Workflows
 
@@ -149,15 +171,39 @@ When the user asks a question against the wiki:
 1. **Read `wiki/index.md`** to identify relevant pages.
 2. **Read those pages** to gather information.
 3. **Synthesize an answer** with `[[wikilink]]` citations to wiki pages.
-4. **Offer to file** substantial answers as new wiki pages (analysis, comparison, deep dive).
-   - If the user agrees: create the page, update index and log.
-   - If the user declines: the answer stays in the conversation.
+4. **Offer to file** substantial answers. Two options:
+   - **File to wiki** — create the answer directly as a wiki page (analysis, comparison, deep dive). Good for short answers that don't need source provenance.
+   - **Save to raw & ingest** — save the answer to `raw/` as a generated source, then run the full Ingest workflow. Better for substantial analyses that should carry source-of-truth provenance. See the **Generate & Ingest** workflow below.
+   - If the user declines both: the answer stays in the conversation.
 5. If filing: **append to `wiki/log.md`**:
    ```
    ## [YYYY-MM-DD] query | Question Summary
 
    Filed answer as [[Page Name]]. Query: "[original question]"
    ```
+
+### Generate & Ingest
+
+When the LLM produces a substantial response that should be preserved as an immutable source:
+
+1. **User triggers**: The user says "file this to raw", "save this", or agrees to the "Save to raw & ingest" option from a Query.
+2. **Save to `raw/`**: Write the response as a markdown file in `raw/` with:
+   - Filename: `Generated - Descriptive Title.md`
+   - Frontmatter: `origin: generated`, `generator: claude`, `date_generated`, `prompt`
+   - Body: the LLM's response, cleaned up for standalone readability (no conversational artifacts like "as I mentioned above").
+3. **Run the standard Ingest workflow** (steps 1-9 above) on the new raw document. The source summary page should carry:
+   - `source_type: synthesis`
+   - `origin: generated`
+   - `generator: claude`
+   - `prompt: "the original question"`
+4. **Append to `wiki/log.md`**:
+   ```
+   ## [YYYY-MM-DD] generate-ingest | Title
+
+   Generated and ingested LLM synthesis. Prompt: "[original question]". Created: [list]. Updated: [list].
+   ```
+
+This workflow gives generated analyses the same provenance trail as external sources — the raw document is immutable, the source summary bridges it to the wiki, and entity/concept pages cite it like any other source.
 
 ### Lint
 
@@ -199,6 +245,7 @@ Last updated: YYYY-MM-DD
 
 ## Source Summaries
 - [[Summary - Title]] — Author, date, key takeaway
+- [[Summary - Title]] — Description (generated)   ← tag synthetic sources
 
 ## Comparisons
 - [[X vs Y]] — What is compared and why
@@ -217,7 +264,7 @@ Last updated: YYYY-MM-DD
 Brief description of what happened.
 ```
 
-Actions: `seed`, `ingest`, `query`, `lint`, `update`, `create`.
+Actions: `seed`, `ingest`, `generate-ingest`, `query`, `lint`, `update`, `create`.
 
 Parse recent entries: `grep "^## \[" wiki/log.md | tail -5`
 

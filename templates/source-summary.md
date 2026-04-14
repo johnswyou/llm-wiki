@@ -6,6 +6,9 @@ date_published: ""
 date_ingested: "{{date}}"
 url: ""
 source_type: article
+origin: external
+# generator: ""        # uncomment when origin: generated
+# prompt: ""           # uncomment when origin: generated
 tags: []
 raw_path: "raw/"
 ---
@@ -17,6 +20,7 @@ raw_path: "raw/"
 | Author | |
 | Published | |
 | Source Type | article |
+| Origin | external |
 | Raw File | `[[raw/]]` |
 
 ## Summary
